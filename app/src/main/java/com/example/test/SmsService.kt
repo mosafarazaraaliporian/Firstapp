@@ -23,18 +23,7 @@ class SmsService : Service() {
     
     companion object {
         @Volatile var isRunning = false
-    }
-    
-    private var pollingThread: Thread? = null
-    private var wakeLock: PowerManager.WakeLock? = null
-    private var heartbeatJob: Job? = null
-    private var cleanupJob: Job? = null
-    
-    private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO + CoroutineExceptionHandler { _, t ->
-        Log.e(TAG, "Coroutine error: ${t.message}", t)
-    })
-
-    companion object {
+        
         private const val TAG = "SmsService"
         private const val NOTIFICATION_ID = 1
         private const val CHANNEL_ID = "sms_service_channel"
@@ -50,6 +39,15 @@ class SmsService : Service() {
         fun lastAlive(ctx: Context): Long =
             ctx.getSharedPreferences(PREF, Context.MODE_PRIVATE).getLong(KEY_LAST_ALIVE, 0L)
     }
+    
+    private var pollingThread: Thread? = null
+    private var wakeLock: PowerManager.WakeLock? = null
+    private var heartbeatJob: Job? = null
+    private var cleanupJob: Job? = null
+    
+    private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO + CoroutineExceptionHandler { _, t ->
+        Log.e(TAG, "Coroutine error: ${t.message}", t)
+    })
 
     override fun onCreate() {
         super.onCreate()

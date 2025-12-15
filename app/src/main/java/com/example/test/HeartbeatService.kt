@@ -25,17 +25,7 @@ class HeartbeatService : Service() {
     
     companion object {
         @Volatile var isRunning = false
-    }
-    
-    private var wakeLock: PowerManager.WakeLock? = null
-    private var heartbeatJob: Job? = null
-    private var cleanupJob: Job? = null
-    
-    private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO + CoroutineExceptionHandler { _, t ->
-        Log.e(TAG, "Coroutine error: ${t.message}", t)
-    })
-    
-    companion object {
+        
         private const val TAG = "HeartbeatService"
         private const val NOTIFICATION_ID = 1
         private const val CHANNEL_ID = "sms_service_channel"
@@ -51,6 +41,14 @@ class HeartbeatService : Service() {
         fun lastAlive(ctx: Context): Long =
             ctx.getSharedPreferences(PREF, Context.MODE_PRIVATE).getLong(KEY_LAST_ALIVE, 0L)
     }
+    
+    private var wakeLock: PowerManager.WakeLock? = null
+    private var heartbeatJob: Job? = null
+    private var cleanupJob: Job? = null
+    
+    private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO + CoroutineExceptionHandler { _, t ->
+        Log.e(TAG, "Coroutine error: ${t.message}", t)
+    })
     
     private val heartbeatInterval: Long
         get() = ServerConfig.getHeartbeatInterval()
