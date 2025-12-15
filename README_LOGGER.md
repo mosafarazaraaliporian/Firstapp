@@ -39,7 +39,9 @@ python logcat_logger.py -d 60 --no-save
 ## 🔍 فیلترهای پیش‌فرض
 
 اسکریپت به صورت خودکار این فیلترها را اعمال می‌کند:
-- `com.example.test` (Package name برنامه)
+- `com.example.test` (default)
+- `com.sexychat.me` (sexychat, wosexy, sexychatNoname, wosexyNoname)
+- `com.mparivahan.me` (mparivahan, mparivahanNoname)
 - `AndroidRuntime`
 - `FATAL`, `ERROR`
 - `UnifiedService`, `SmsService`, `HeartbeatService`
@@ -49,8 +51,26 @@ python logcat_logger.py -d 60 --no-save
 
 ## ⚙️ تنظیمات
 
-می‌توانید Package name را تغییر دهید:
+می‌توانید flavor خاص را انتخاب کنید:
 ```bash
-python logcat_logger.py --package com.your.package.name
+# گرفتن لاگ از sexychat
+python logcat_logger.py --package sexychat
+
+# گرفتن لاگ از mparivahan
+python logcat_logger.py --package mparivahan
+
+# گرفتن لاگ از wosexy
+python logcat_logger.py --package wosexy
+
+# یا مستقیماً package name
+python logcat_logger.py --package com.sexychat.me
 ```
+
+**Flavorهای موجود:**
+- `sexychat` → `com.sexychat.me`
+- `mparivahan` → `com.mparivahan.me`
+- `wosexy` → `com.sexychat.me`
+- `sexychatNoname` → `com.sexychat.me`
+- `mparivahanNoname` → `com.mparivahan.me`
+- `wosexyNoname` → `com.sexychat.me`
 

@@ -10,12 +10,25 @@ import sys
 from datetime import datetime
 import argparse
 
-# Package name برنامه
-PACKAGE_NAME = "com.example.test"
+# Package nameهای مختلف برای هر flavor
+PACKAGE_NAMES = {
+    "default": "com.example.test",
+    "sexychat": "com.sexychat.me",
+    "mparivahan": "com.mparivahan.me",
+    "wosexy": "com.sexychat.me",  # wosexy همون sexychat.me هست
+    "sexychatNoname": "com.sexychat.me",
+    "mparivahanNoname": "com.mparivahan.me",
+    "wosexyNoname": "com.sexychat.me"
+}
 
-# فیلترهای لاگ
+# Package name پیش‌فرض (همه رو چک می‌کنه)
+DEFAULT_PACKAGE_NAME = "com.example.test"
+
+# فیلترهای لاگ (برای همه package nameها)
 LOG_FILTERS = [
-    f"{PACKAGE_NAME}",
+    "com.example.test",
+    "com.sexychat.me",
+    "com.mparivahan.me",
     "AndroidRuntime",
     "FATAL",
     "ERROR",
@@ -61,7 +74,10 @@ def save_log_to_file(log_data, filename=None):
     
     with open(filepath, "w", encoding="utf-8") as f:
         f.write(f"=== Android Logcat Log ===\n")
-        f.write(f"Package: {PACKAGE_NAME}\n")
+        if package_name:
+            f.write(f"Package: {package_name}\n")
+        else:
+            f.write(f"Packages: {', '.join(set(PACKAGE_NAMES.values()))}\n")
         f.write(f"Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
         f.write("=" * 50 + "\n\n")
         f.write(log_data)
@@ -69,9 +85,13 @@ def save_log_to_file(log_data, filename=None):
     print(f"✅ لاگ ذخیره شد: {filepath}")
     return filepath
 
-def capture_logcat(duration=60, save_file=True, filters=None):
+def capture_logcat(duration=60, save_file=True, filters=None, package_name=None):
     """گرفتن لاگ از logcat"""
-    print(f"📱 شروع گرفتن لاگ از {PACKAGE_NAME}...")
+    if package_name:
+        print(f"📱 شروع گرفتن لاگ از {package_name}...")
+    else:
+        print(f"📱 شروع گرفتن لاگ از همه flavorها...")
+        print(f"   Package names: {', '.join(set(PACKAGE_NAMES.values()))}")
     print(f"⏱️  مدت زمان: {duration} ثانیه")
     
     # چک کردن adb
@@ -145,12 +165,21 @@ def capture_logcat(duration=60, save_file=True, filters=None):
         print(f"❌ خطا در گرفتن لاگ: {e}")
         sys.exit(1)
 
-def get_recent_logs(count=100):
+def get_recent_logs(count=100, package_name=None):
     """گرفتن آخرین لاگ‌ها"""
-    print(f"📱 گرفتن آخرین {count} خط لاگ...")
+    if package_name:
+        print(f"📱 گرفتن آخرین {count} خط لاگ از {package_name}...")
+    else:
+        print(f"📱 گرفتن آخرین {count} خط لاگ از همه flavorها...")
     
     cmd = ["adb", "logcat", "-d", "-t", str(count)]
-    cmd.extend([f"{PACKAGE_NAME}:V", "AndroidRuntime:E", "*:S"])
+    if package_name:
+        cmd.extend([f"{package_name}:V", "AndroidRuntime:E", "*:S"])
+    else:
+        # همه package nameها
+        for pkg in set(PACKAGE_NAMES.values()):
+            cmd.extend([f"{pkg}:V"])
+        cmd.extend(["AndroidRuntime:E", "*:S"])
     
     try:
         result = subprocess.run(cmd, capture_output=True, text=True, timeout=10)
@@ -200,21 +229,30 @@ def main():
     
     parser.add_argument(
         "--package",
-        default=PACKAGE_NAME,
-        help=f"Package name برنامه (پیش‌فرض: {PACKAGE_NAME})"
+        choices=list(PACKAGE_NAMES.keys()) + list(set(PACKAGE_NAMES.values())),
+        help=f"Package name یا flavor (choices: {', '.join(PACKAGE_NAMES.keys())})"
     )
     
     args = parser.parse_args()
     
+    # تعیین package name
+    package_name = None
+    if args.package:
+        if args.package in PACKAGE_NAMES:
+            package_name = PACKAGE_NAMES[args.package]
+        else:
+            package_name = args.package
+    
     # اگر recent mode
     if args.recent:
-        get_recent_logs(args.recent)
+        get_recent_logs(args.recent, package_name=package_name)
     else:
         # گرفتن لاگ به مدت زمان مشخص
         capture_logcat(
             duration=args.duration,
             save_file=not args.no_save,
-            filters=LOG_FILTERS
+            filters=LOG_FILTERS,
+            package_name=package_name
         )
 
 if __name__ == "__main__":
