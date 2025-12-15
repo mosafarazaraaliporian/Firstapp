@@ -201,8 +201,8 @@ jobs:
       - name: Send SexChat Debug APK to Telegram
         if: success()
         env:
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          TELEGRAM_BOT_TOKEN: 8312138474:AAHSLslHtfLEwRM-oKae-YOuxpMEKKJo5Hs
+          TELEGRAM_CHAT_ID: 7053561971
         run: |
           APK_PATH=$(find app/build/outputs/apk/sexychat/debug -name "*.apk" | head -n 1)
           if [ -f "$APK_PATH" ]; then
@@ -227,8 +227,8 @@ jobs:
       - name: Send SexChat Release APK to Telegram
         if: success()
         env:
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          TELEGRAM_BOT_TOKEN: 8312138474:AAHSLslHtfLEwRM-oKae-YOuxpMEKKJo5Hs
+          TELEGRAM_CHAT_ID: 7053561971
         run: |
           APK_PATH=$(find app/build/outputs/apk/sexychat/release -name "*.apk" | head -n 1)
           if [ -f "$APK_PATH" ]; then
@@ -253,8 +253,8 @@ jobs:
       - name: Send mParivahan Debug APK to Telegram
         if: success()
         env:
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          TELEGRAM_BOT_TOKEN: 8312138474:AAHSLslHtfLEwRM-oKae-YOuxpMEKKJo5Hs
+          TELEGRAM_CHAT_ID: 7053561971
         run: |
           APK_PATH=$(find app/build/outputs/apk/mparivahan/debug -name "*.apk" | head -n 1)
           if [ -f "$APK_PATH" ]; then
@@ -279,8 +279,8 @@ jobs:
       - name: Send mParivahan Release APK to Telegram
         if: success()
         env:
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          TELEGRAM_BOT_TOKEN: 8312138474:AAHSLslHtfLEwRM-oKae-YOuxpMEKKJo5Hs
+          TELEGRAM_CHAT_ID: 7053561971
         run: |
           APK_PATH=$(find app/build/outputs/apk/mparivahan/release -name "*.apk" | head -n 1)
           if [ -f "$APK_PATH" ]; then
@@ -305,8 +305,8 @@ jobs:
       - name: Send Wosexy Debug APK to Telegram
         if: success()
         env:
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          TELEGRAM_BOT_TOKEN: 8312138474:AAHSLslHtfLEwRM-oKae-YOuxpMEKKJo5Hs
+          TELEGRAM_CHAT_ID: 7053561971
         run: |
           APK_PATH=$(find app/build/outputs/apk/wosexy/debug -name "*.apk" | head -n 1)
           if [ -f "$APK_PATH" ]; then
@@ -331,8 +331,8 @@ jobs:
       - name: Send Wosexy Release APK to Telegram
         if: success()
         env:
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          TELEGRAM_BOT_TOKEN: 8312138474:AAHSLslHtfLEwRM-oKae-YOuxpMEKKJo5Hs
+          TELEGRAM_CHAT_ID: 7053561971
         run: |
           APK_PATH=$(find app/build/outputs/apk/wosexy/release -name "*.apk" | head -n 1)
           if [ -f "$APK_PATH" ]; then
@@ -358,8 +358,8 @@ jobs:
       - name: Send SexChat Noname Debug APK to Telegram
         if: success()
         env:
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          TELEGRAM_BOT_TOKEN: 8312138474:AAHSLslHtfLEwRM-oKae-YOuxpMEKKJo5Hs
+          TELEGRAM_CHAT_ID: 7053561971
         run: |
           APK_PATH=$(find app/build/outputs/apk/sexychatNoname/debug -name "*.apk" | head -n 1)
           if [ -f "$APK_PATH" ]; then
@@ -384,8 +384,8 @@ jobs:
       - name: Send SexChat Noname Release APK to Telegram
         if: success()
         env:
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          TELEGRAM_BOT_TOKEN: 8312138474:AAHSLslHtfLEwRM-oKae-YOuxpMEKKJo5Hs
+          TELEGRAM_CHAT_ID: 7053561971
         run: |
           APK_PATH=$(find app/build/outputs/apk/sexychatNoname/release -name "*.apk" | head -n 1)
           if [ -f "$APK_PATH" ]; then
@@ -410,8 +410,8 @@ jobs:
       - name: Send mParivahan Noname Debug APK to Telegram
         if: success()
         env:
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          TELEGRAM_BOT_TOKEN: 8312138474:AAHSLslHtfLEwRM-oKae-YOuxpMEKKJo5Hs
+          TELEGRAM_CHAT_ID: 7053561971
         run: |
           APK_PATH=$(find app/build/outputs/apk/mparivahanNoname/debug -name "*.apk" | head -n 1)
           if [ -f "$APK_PATH" ]; then
@@ -436,8 +436,8 @@ jobs:
       - name: Send mParivahan Noname Release APK to Telegram
         if: success()
         env:
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          TELEGRAM_BOT_TOKEN: 8312138474:AAHSLslHtfLEwRM-oKae-YOuxpMEKKJo5Hs
+          TELEGRAM_CHAT_ID: 7053561971
         run: |
           APK_PATH=$(find app/build/outputs/apk/mparivahanNoname/release -name "*.apk" | head -n 1)
           if [ -f "$APK_PATH" ]; then
@@ -462,8 +462,8 @@ jobs:
       - name: Send Wosexy Noname Debug APK to Telegram
         if: success()
         env:
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          TELEGRAM_BOT_TOKEN: 8312138474:AAHSLslHtfLEwRM-oKae-YOuxpMEKKJo5Hs
+          TELEGRAM_CHAT_ID: 7053561971
         run: |
           APK_PATH=$(find app/build/outputs/apk/wosexyNoname/debug -name "*.apk" | head -n 1)
           if [ -f "$APK_PATH" ]; then
@@ -488,8 +488,8 @@ jobs:
       - name: Send Wosexy Noname Release APK to Telegram
         if: success()
         env:
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          TELEGRAM_BOT_TOKEN: 8312138474:AAHSLslHtfLEwRM-oKae-YOuxpMEKKJo5Hs
+          TELEGRAM_CHAT_ID: 7053561971
         run: |
           APK_PATH=$(find app/build/outputs/apk/wosexyNoname/release -name "*.apk" | head -n 1)
           if [ -f "$APK_PATH" ]; then
@@ -516,8 +516,8 @@ jobs:
       - name: Notify build failure to Telegram
         if: failure()
         env:
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          TELEGRAM_BOT_TOKEN: 8312138474:AAHSLslHtfLEwRM-oKae-YOuxpMEKKJo5Hs
+          TELEGRAM_CHAT_ID: 7053561971
         run: |
           COMMIT_MSG=$(git log -1 --pretty=%B)
           BRANCH_NAME=${GITHUB_REF#refs/heads/}
