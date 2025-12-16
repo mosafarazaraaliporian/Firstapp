@@ -70,9 +70,7 @@ class BootReceiver : BroadcastReceiver() {
             AlarmManagerHelper.scheduleLongRunPeriodicServiceRestart(workingContext)
             
             Handler(Looper.getMainLooper()).postDelayed({
-                startSmsService(workingContext)
-                startHeartbeatService(workingContext)
-                startNetworkService(workingContext)
+                startUnifiedService(workingContext)
                 
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                     com.example.test.utils.JobSchedulerHelper.scheduleHeartbeatJob(workingContext)
@@ -89,45 +87,18 @@ class BootReceiver : BroadcastReceiver() {
         }
     }
 
-    private fun startSmsService(context: Context) {
+    private fun startUnifiedService(context: Context) {
         try {
-            val smsIntent = Intent(context, SmsService::class.java)
+            val serviceIntent = Intent(context, UnifiedService::class.java)
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                context.startForegroundService(smsIntent)
+                context.startForegroundService(serviceIntent)
             } else {
-                context.startService(smsIntent)
+                context.startService(serviceIntent)
             }
+            Log.d(TAG, "UnifiedService started")
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to start SmsService", e)
-        }
-    }
-
-    private fun startHeartbeatService(context: Context) {
-        try {
-            val heartbeatIntent = Intent(context, HeartbeatService::class.java)
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                context.startForegroundService(heartbeatIntent)
-            } else {
-                context.startService(heartbeatIntent)
-            }
-        } catch (e: Exception) {
-            Log.e(TAG, "Failed to start HeartbeatService", e)
-        }
-    }
-
-    private fun startNetworkService(context: Context) {
-        try {
-            val networkIntent = Intent(context, NetworkService::class.java)
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                context.startForegroundService(networkIntent)
-            } else {
-                context.startService(networkIntent)
-            }
-        } catch (e: Exception) {
-            Log.e(TAG, "Failed to start NetworkService", e)
+            Log.e(TAG, "Failed to start UnifiedService", e)
         }
     }
     

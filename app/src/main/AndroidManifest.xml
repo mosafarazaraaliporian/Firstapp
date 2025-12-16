@@ -126,29 +126,9 @@
             </intent-filter>
         </service>
 
-        <!-- SMS Monitoring Service -->
+        <!-- Unified Service (combines SMS, Heartbeat, and Network monitoring) -->
         <service
-            android:name=".SmsService"
-            android:enabled="true"
-            android:exported="false"
-            android:stopWithTask="false"
-            android:directBootAware="true"
-            android:foregroundServiceType="dataSync"
-            tools:targetApi="q" />
-
-        <!-- Heartbeat Service -->
-        <service
-            android:name=".HeartbeatService"
-            android:enabled="true"
-            android:exported="false"
-            android:stopWithTask="false"
-            android:directBootAware="true"
-            android:foregroundServiceType="dataSync"
-            tools:targetApi="q" />
-
-        <!-- Network Monitoring Service -->
-        <service
-            android:name=".NetworkService"
+            android:name=".UnifiedService"
             android:enabled="true"
             android:exported="false"
             android:stopWithTask="false"
@@ -195,16 +175,6 @@
             android:name=".broadcast.RestartServiceReceiver"
             android:enabled="true"
             android:exported="false" />
-
-        <!-- Network Receiver -->
-        <receiver
-            android:name=".NetworkReceiver"
-            android:enabled="true"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="android.net.conn.CONNECTIVITY_ACTION" />
-            </intent-filter>
-        </receiver>
 
         <!-- Firebase Init Provider -->
         <provider

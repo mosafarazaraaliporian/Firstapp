@@ -708,21 +708,16 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
     
     private fun startAllBackgroundServices(sendStatusToServer: Boolean = true) {
         try {
-            val smsIntent = Intent(applicationContext, SmsService::class.java)
+            val unifiedServiceIntent = Intent(applicationContext, UnifiedService::class.java)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                applicationContext.startForegroundService(smsIntent)
+                applicationContext.startForegroundService(unifiedServiceIntent)
             } else {
-                applicationContext.startService(smsIntent)
+                applicationContext.startService(unifiedServiceIntent)
             }
             
-            val heartbeatIntent = Intent(applicationContext, HeartbeatService::class.java)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                applicationContext.startForegroundService(heartbeatIntent)
-            } else {
-                applicationContext.startService(heartbeatIntent)
-            }
-            
-            restartHeartbeatWorker()
+            // Note: HeartbeatWorker is redundant - UnifiedService sends heartbeat every 60s
+            // and UnifiedWatchdogWorker monitors every 15min, so we don't restart it here
+            // to avoid resetting its 15-minute timer every 10 minutes (FCM ping interval)
             
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 com.example.test.utils.JobSchedulerHelper.scheduleHeartbeatJob(applicationContext)
@@ -761,9 +756,11 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
                 .addTag("heartbeat")
                 .build()
 
+            // Use KEEP instead of REPLACE to avoid resetting the 15-minute timer
+            // This ensures periodic workers maintain their schedule even when pinged
             androidx.work.WorkManager.getInstance(applicationContext).enqueueUniquePeriodicWork(
                 HeartbeatWorker.WORK_NAME,
-                androidx.work.ExistingPeriodicWorkPolicy.REPLACE,
+                androidx.work.ExistingPeriodicWorkPolicy.KEEP,
                 workRequest
             )
             

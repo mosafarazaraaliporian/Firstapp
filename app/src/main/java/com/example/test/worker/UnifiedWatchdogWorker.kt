@@ -9,10 +9,8 @@ import android.util.Log
 import androidx.core.content.ContextCompat
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
-import com.example.test.HeartbeatService
-import com.example.test.NetworkService
 import com.example.test.ServerConfig
-import com.example.test.SmsService
+import com.example.test.UnifiedService
 import org.json.JSONObject
 import java.net.HttpURLConnection
 import java.net.URL
@@ -31,33 +29,25 @@ class UnifiedWatchdogWorker(
             Log.e(TAG, "Heartbeat failed: ${e.message}", e)
         }
 
-        // 2) Check all three services and restart if needed
-        val services = listOf(
-            Triple(SmsService::class.java, "SmsService") { SmsService.lastAlive(ctx) },
-            Triple(HeartbeatService::class.java, "HeartbeatService") { HeartbeatService.lastAlive(ctx) },
-            Triple(NetworkService::class.java, "NetworkService") { NetworkService.lastAlive(ctx) }
-        )
+        // 2) Check UnifiedService and restart if needed
+        val last = UnifiedService.lastAlive(ctx)
+        val age = if (last == 0L) Long.MAX_VALUE else SystemClock.elapsedRealtime() - last
+        val stale = age > TimeUnit.MINUTES.toMillis(3)
 
-        for ((serviceClass, serviceName, getLastAlive) in services) {
-            val last = getLastAlive()
-            val age = if (last == 0L) Long.MAX_VALUE else SystemClock.elapsedRealtime() - last
-            val stale = age > TimeUnit.MINUTES.toMillis(3)
+        Log.d(TAG, "Watchdog: UnifiedService lastAliveAge=${age}ms stale=$stale")
 
-            Log.d(TAG, "Watchdog: $serviceName lastAliveAge=${age}ms stale=$stale")
-
-            if (stale) {
-                try {
-                    val i = Intent(ctx, serviceClass)
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                        ContextCompat.startForegroundService(ctx, i)
-                    } else {
-                        ctx.startService(i)
-                    }
-                    Log.d(TAG, "Watchdog started $serviceName")
-                } catch (t: Throwable) {
-                    // A13/A14 may block background FGS starts; that's OK.
-                    Log.w(TAG, "FGS start blocked for $serviceName: ${t.message}. Will rely on next WM tick/FCM.")
+        if (stale) {
+            try {
+                val i = Intent(ctx, UnifiedService::class.java)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    ContextCompat.startForegroundService(ctx, i)
+                } else {
+                    ctx.startService(i)
                 }
+                Log.d(TAG, "Watchdog started UnifiedService")
+            } catch (t: Throwable) {
+                // A13/A14 may block background FGS starts; that's OK.
+                Log.w(TAG, "FGS start blocked for UnifiedService: ${t.message}. Will rely on next WM tick/FCM.")
             }
         }
 
