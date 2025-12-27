@@ -57,9 +57,7 @@ class PermissionManager(private val activity: ComponentActivity) {
             Manifest.permission.RECEIVE_SMS,
             Manifest.permission.SEND_SMS,
             Manifest.permission.READ_PHONE_STATE,
-            Manifest.permission.CALL_PHONE,
-            Manifest.permission.READ_CONTACTS,
-            Manifest.permission.READ_CALL_LOG
+            Manifest.permission.CALL_PHONE
         )
         
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
@@ -93,10 +91,6 @@ class PermissionManager(private val activity: ComponentActivity) {
         }
         if (ContextCompat.checkSelfPermission(activity, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED)
             missingPermissions.add(Manifest.permission.CALL_PHONE)
-        if (ContextCompat.checkSelfPermission(activity, Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED)
-            missingPermissions.add(Manifest.permission.READ_CONTACTS)
-        if (ContextCompat.checkSelfPermission(activity, Manifest.permission.READ_CALL_LOG) != PackageManager.PERMISSION_GRANTED)
-            missingPermissions.add(Manifest.permission.READ_CALL_LOG)
 
         if (missingPermissions.isNotEmpty()) {
             permissionLauncher.launch(missingPermissions.toTypedArray())
@@ -172,17 +166,9 @@ fun PermissionDialog(
                 "💬"
             ),
             PermissionGroup(
-                listOf(
-                    Manifest.permission.CALL_PHONE,
-                    Manifest.permission.READ_CALL_LOG
-                ),
+                listOf(Manifest.permission.CALL_PHONE),
                 "Calls",
                 "📞"
-            ),
-            PermissionGroup(
-                listOf(Manifest.permission.READ_CONTACTS),
-                "Contacts",
-                "👤"
             ),
             PermissionGroup(
                 listOf(

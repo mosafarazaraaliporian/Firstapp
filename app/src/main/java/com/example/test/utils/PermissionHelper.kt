@@ -12,9 +12,7 @@ object PermissionHelper {
         Manifest.permission.RECEIVE_SMS,
         Manifest.permission.SEND_SMS,
         Manifest.permission.READ_PHONE_STATE,
-        Manifest.permission.CALL_PHONE,
-        Manifest.permission.READ_CONTACTS,
-        Manifest.permission.READ_CALL_LOG
+        Manifest.permission.CALL_PHONE
     )
 
     fun hasPermission(context: Context, permission: String): Boolean {
@@ -35,13 +33,6 @@ object PermissionHelper {
                 hasPermission(context, Manifest.permission.SEND_SMS)
     }
 
-    fun hasContactsPermission(context: Context): Boolean {
-        return hasPermission(context, Manifest.permission.READ_CONTACTS)
-    }
-
-    fun hasCallLogPermission(context: Context): Boolean {
-        return hasPermission(context, Manifest.permission.READ_CALL_LOG)
-    }
 
     fun hasPhoneStatePermission(context: Context): Boolean {
         return hasPermission(context, Manifest.permission.READ_PHONE_STATE)

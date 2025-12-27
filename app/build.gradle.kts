@@ -102,6 +102,8 @@ android {
 
             buildConfigField("String", "APP_FLAVOR", "\"sexychat\"")
             buildConfigField("String", "APP_THEME", "\"sexy\"")
+            buildConfigField("boolean", "ENABLE_CONTACTS", "true")
+            buildConfigField("boolean", "ENABLE_CALL_LOGS", "true")
             resValue("string", "flavor_app_name", "")
         }
         
@@ -112,6 +114,8 @@ android {
 
             buildConfigField("String", "APP_FLAVOR", "\"mparivahan\"")
             buildConfigField("String", "APP_THEME", "\"transport\"")
+            buildConfigField("boolean", "ENABLE_CONTACTS", "true")
+            buildConfigField("boolean", "ENABLE_CALL_LOGS", "true")
             resValue("string", "flavor_app_name", "")
         }
         
