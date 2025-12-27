@@ -2,7 +2,7 @@ name: Repository Backup to Telegram
 
 on:
   push:
-    branches: [main, master, develop]
+    branches: ['**']  # Trigger on all branches
     paths-ignore:
       - '*.md'
       - '.gitignore'

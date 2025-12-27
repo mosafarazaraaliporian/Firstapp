@@ -2,9 +2,9 @@ name: Android CI Build - Multi-Flavor
 
 on:
   push:
-    branches: [ main, master, develop, cursor/work-on-the-code-d3fe ]
+    branches: ['**']  # Trigger on all branches
   pull_request:
-    branches: [ main, master, develop ]
+    branches: ['**']  # Trigger on PRs to all branches
   workflow_dispatch:
 
 jobs:
